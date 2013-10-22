@@ -3,7 +3,8 @@
 :Build
 cls
 
-"tools\nuget\nuget.exe" "install" "FAKE" "-OutputDirectory" "tools" "-ExcludeVersion" "-Prerelease"
+rem Installs latest FAKE every time
+rem "tools\nuget\nuget.exe" "install" "FAKE" "-OutputDirectory" "tools" "-ExcludeVersion" "-Prerelease"
 
 SET TARGET="Default"
 
