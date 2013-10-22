@@ -1,10 +1,9 @@
 ﻿#r "tools/Fake/tools/FakeLib.dll"
-#I "packages/FSharp.Formatting.1.0.13/lib/net40"
-#load "packages/FSharp.Formatting.1.0.13/literate/literate.fsx"
+//#I @"tools\FSharp.Formatting"
+
 
 open Fake
 open System.IO
-open FSharp.Literate
 
 let nugetPath = Path.Combine(__SOURCE_DIRECTORY__,@"tools\NuGet\NuGet.exe")
 
@@ -71,16 +70,6 @@ Target "Test" (fun _ ->
                 OutputFile = testDir + "\TestResults.xml" })
 )
 
-Target "Docs" (fun _ -> 
-    let template = Path.Combine(currentDirectory, "template.html")
-    let sources = Path.Combine(__SOURCE_DIRECTORY__, "samples")
-    let output = docsDir
-    
-    Literate.ProcessDirectory(sources, template, output)
-    
-    XCopy docsDir "docs"
-)
-
 Target "Deploy" (fun _ ->
     !+ (buildDir + "/**/FSharp.Enterprise*.dll")
         -- "*.zip"
@@ -102,7 +91,7 @@ Target "BuildNuGet" (fun _ ->
                     CopyFile dir path)
     NuGet (fun p ->
         {p with               
-            Authors = ["Colin Bull"]
+            Authors = ["Simon Cousins"]
             Project = projectName
             Description = "F# Enterprise Library collection"
             Version = version
@@ -110,13 +99,13 @@ Target "BuildNuGet" (fun _ ->
             WorkingDir = nugetDir
             AccessKey = nugetKey
            // ToolPath = "tools\Nuget\Nuget.exe"
-            Publish = nugetKey <> ""})
+            PublishUrl = "http://hp20006551:8082/httpAuth/app/nuget/v1/FeedService.svc/"       
+            Publish = false})
         ("./FSharp.Enterprise.nuspec")
     [
        (nugetDir) + sprintf "\FSharp.Enterprise.%s.nupkg" version
     ] |> CopyTo deployDir
 )
-
 
 Target "Default" DoNothing
 
@@ -124,13 +113,12 @@ Target "Default" DoNothing
     ==> "Clean"
     ==> "BuildApp" <=> "BuildTest"
     ==> "Test" 
-    ==> "Docs"
     ==> "BuildNuGet"
     ==> "Deploy"
     ==> "Default"
   
 if not isLocalBuild then
-    "Clean" ==> "SetAssemblyInfo" ==> "BuildApp" |> ignore
+    "Clean" ==> "AssemblyInfo" ==> "BuildApp" |> ignore
 
 // start build
 RunParameterTargetOrDefault "target" "Default"

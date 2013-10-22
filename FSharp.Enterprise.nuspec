@@ -8,11 +8,11 @@
     <owners>@authors@</owners>
     <language>en-US</language>
     <summary>@description@</summary>
-   <projectUrl>http://github.com/colinbull/FSharp.Enterprise</projectUrl>
-    <licenseUrl>http://github.com/colinbull/FSharp.Enterprise/blob/master</licenseUrl>
+   <projectUrl>http://github.com/simontcousins/FSharp.Enterprise</projectUrl>
+    <licenseUrl>http://github.com/simontcousins/FSharp.Enterprise/blob/master</licenseUrl>
     <tags>fsharp enterprise rabbitmq</tags>
 	<dependencies>
-    <dependency id="FSharpx.Core" version="1.8.32" />
+    <dependency id="FSharpx.Core" version="1.8.41" />
 	</dependencies>
   </metadata>   
 </package>
