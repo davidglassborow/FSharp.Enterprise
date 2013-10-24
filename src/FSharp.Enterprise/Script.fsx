@@ -1,22 +1,20 @@
-﻿
-open System
-open Microsoft.FSharp.Reflection
-open Microsoft.FSharp.Quotations
-open Microsoft.FSharp.Quotations.Patterns
+﻿#load "Option.fs"
+open FSharp.Enterprise
+#load "DateTime.fs"
+open FSharp.Enterprise
+#load "Interval.fs"
+open FSharp.Enterprise
 
-type Segment<'a, 'b> = 
-    | Instant of 'a * 'b
-    | Discrete of ('a * 'a) * 'b
-    | Continuous of ('a * 'b) * ('a * 'b)
+let intervals = [
+        Interval.make(0,100)
+        Interval.make(100,200)
+        Interval.make(200,300)
+        Interval.make(300,400)
+        Interval.make(400,500)
+    ]
 
-type Line<'a, 'b> =  Segment<'a,'b> array
-
-
-let make (ctorF:'a -> Segment<'b,'c>) (args:seq<'a>) : Line<'b,'c> = args |> Seq.map ctorF |> Seq.toArray
-
-let discrete = make Discrete [(1,2), 2; (2,3), 3]
-let contLine = make Continuous [(1,1), (2,2); (2,2), (3,3)]
-let instLine = make Instant [(1,2); (2,3)]
-let emptyLine : Line<int,int> = make Discrete []
-
-
+intervals
+|> List.filter 
+    (Interval.Integer.intersects 
+        IntervalType.T.LeftClosedRightOpen (Interval.make(100,300)) 
+        IntervalType.T.LeftClosedRightOpen) 

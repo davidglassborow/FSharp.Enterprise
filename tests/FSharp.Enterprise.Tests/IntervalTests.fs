@@ -153,6 +153,210 @@ type ``Given the Interval Value module`` () =
         Interval.Value.isBounded interval |> should be False
 
 [<TestFixture; Category("Unit")>]
+type ``Given an integer interval`` () =
+
+    [<Test>]
+    member x.``I can derived the closed interval`` () =
+        let a = Interval.make(0,100)
+        Interval.Integer.toClosed IntervalType.T.Closed a |> should equal (Interval.make(0,100))
+        Interval.Integer.toClosed IntervalType.T.Open a |> should equal (Interval.make(1,99))
+        Interval.Integer.toClosed IntervalType.T.LeftClosedRightOpen a |> should equal (Interval.make(0,99))
+        Interval.Integer.toClosed IntervalType.T.LeftOpenRightClosed a |> should equal (Interval.make(1,100))
+        Interval.Integer.toClosed IntervalType.T.Closed (Interval.flip a) |> should equal (Interval.make(100,0))
+        Interval.Integer.toClosed IntervalType.T.Open (Interval.flip a) |> should equal (Interval.make(99,1))
+        Interval.Integer.toClosed IntervalType.T.LeftClosedRightOpen (Interval.flip a) |> should equal (Interval.make(100,1))
+        Interval.Integer.toClosed IntervalType.T.LeftOpenRightClosed (Interval.flip a) |> should equal (Interval.make(99,0))
+
+    [<Test>]
+    member x.``I can check if it overlaps with another interval`` () =
+        let a = Interval.make(0,100)
+        let b = Interval.make(99,200)
+        let c = Interval.flip a
+        let d = Interval.flip b
+
+        // a(0,100) b(99,200)
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.Closed b |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.Open b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.LeftClosedRightOpen b |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.LeftOpenRightClosed b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Open a IntervalType.T.Closed b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Open a IntervalType.T.Open b |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.Open a IntervalType.T.LeftClosedRightOpen b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Open a IntervalType.T.LeftOpenRightClosed b |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen a IntervalType.T.Closed b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen a IntervalType.T.Open b |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen a IntervalType.T.LeftClosedRightOpen b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen a IntervalType.T.LeftOpenRightClosed b |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed a IntervalType.T.Closed b |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed a IntervalType.T.Open b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed a IntervalType.T.LeftClosedRightOpen b |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed a IntervalType.T.LeftOpenRightClosed b |> should equal 0
+        // c(100,0) b(99,200)
+        Interval.Integer.overlaps IntervalType.T.Closed c IntervalType.T.Closed b |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.Closed c IntervalType.T.Open b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed c IntervalType.T.LeftClosedRightOpen b |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.Closed c IntervalType.T.LeftOpenRightClosed b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Open c IntervalType.T.Closed b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Open c IntervalType.T.Open b |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.Open c IntervalType.T.LeftClosedRightOpen b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Open c IntervalType.T.LeftOpenRightClosed b |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen c IntervalType.T.Closed b |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen c IntervalType.T.Open b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen c IntervalType.T.LeftClosedRightOpen b |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen c IntervalType.T.LeftOpenRightClosed b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed c IntervalType.T.Closed b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed c IntervalType.T.Open b |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed c IntervalType.T.LeftClosedRightOpen b |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed c IntervalType.T.LeftOpenRightClosed b |> should equal -1
+        // a(0,100) d(200,99)
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.Closed d |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.Open d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.LeftClosedRightOpen d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.LeftOpenRightClosed d |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.Open a IntervalType.T.Closed d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Open a IntervalType.T.Open d |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.Open a IntervalType.T.LeftClosedRightOpen d |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.Open a IntervalType.T.LeftOpenRightClosed d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen a IntervalType.T.Closed d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen a IntervalType.T.Open d |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen a IntervalType.T.LeftClosedRightOpen d |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen a IntervalType.T.LeftOpenRightClosed d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed a IntervalType.T.Closed d |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed a IntervalType.T.Open d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed a IntervalType.T.LeftClosedRightOpen d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed a IntervalType.T.LeftOpenRightClosed d |> should equal 1
+        // c(100,0) d(200,99)
+        Interval.Integer.overlaps IntervalType.T.Closed c IntervalType.T.Closed d |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.Closed c IntervalType.T.Open d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed c IntervalType.T.LeftClosedRightOpen d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed c IntervalType.T.LeftOpenRightClosed d |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.Open c IntervalType.T.Closed d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Open c IntervalType.T.Open d |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.Open c IntervalType.T.LeftClosedRightOpen d |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.Open c IntervalType.T.LeftOpenRightClosed d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen c IntervalType.T.Closed d |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen c IntervalType.T.Open d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen c IntervalType.T.LeftClosedRightOpen d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftClosedRightOpen c IntervalType.T.LeftOpenRightClosed d |> should equal 1
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed c IntervalType.T.Closed d |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed c IntervalType.T.Open d |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed c IntervalType.T.LeftClosedRightOpen d |> should equal -1
+        Interval.Integer.overlaps IntervalType.T.LeftOpenRightClosed c IntervalType.T.LeftOpenRightClosed d |> should equal 0
+
+    [<Test>]
+    member x.``I can check if it intersects with another interval`` () =
+        let a = Interval.make(0,100)
+        let b = Interval.make(99,200)
+        let c = Interval.flip a
+        let d = Interval.flip b
+
+        // a(0,100) b(99,200)
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.Closed b |> should be True
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.Open b |> should be False
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.LeftClosedRightOpen b |> should be True
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.LeftOpenRightClosed b |> should be False
+        Interval.Integer.intersects IntervalType.T.Open a IntervalType.T.Closed b |> should be False
+        Interval.Integer.intersects IntervalType.T.Open a IntervalType.T.Open b |> should be False
+        Interval.Integer.intersects IntervalType.T.Open a IntervalType.T.LeftClosedRightOpen b |> should be False
+        Interval.Integer.intersects IntervalType.T.Open a IntervalType.T.LeftOpenRightClosed b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen a IntervalType.T.Closed b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen a IntervalType.T.Open b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen a IntervalType.T.LeftClosedRightOpen b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen a IntervalType.T.LeftOpenRightClosed b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed a IntervalType.T.Closed b |> should be True
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed a IntervalType.T.Open b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed a IntervalType.T.LeftClosedRightOpen b |> should be True
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed a IntervalType.T.LeftOpenRightClosed b |> should be False
+        // c(100,0) b(99,200)
+        Interval.Integer.intersects IntervalType.T.Closed c IntervalType.T.Closed b |> should be True
+        Interval.Integer.intersects IntervalType.T.Closed c IntervalType.T.Open b |> should be False
+        Interval.Integer.intersects IntervalType.T.Closed c IntervalType.T.LeftClosedRightOpen b |> should be True
+        Interval.Integer.intersects IntervalType.T.Closed c IntervalType.T.LeftOpenRightClosed b |> should be False
+        Interval.Integer.intersects IntervalType.T.Open c IntervalType.T.Closed b |> should be False
+        Interval.Integer.intersects IntervalType.T.Open c IntervalType.T.Open b |> should be False
+        Interval.Integer.intersects IntervalType.T.Open c IntervalType.T.LeftClosedRightOpen b |> should be False
+        Interval.Integer.intersects IntervalType.T.Open c IntervalType.T.LeftOpenRightClosed b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen c IntervalType.T.Closed b |> should be True
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen c IntervalType.T.Open b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen c IntervalType.T.LeftClosedRightOpen b |> should be True
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen c IntervalType.T.LeftOpenRightClosed b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed c IntervalType.T.Closed b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed c IntervalType.T.Open b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed c IntervalType.T.LeftClosedRightOpen b |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed c IntervalType.T.LeftOpenRightClosed b |> should be False
+        // a(0,100) d(200,99)
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.Closed d |> should be True
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.Open d |> should be False
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.LeftClosedRightOpen d |> should be False
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.LeftOpenRightClosed d |> should be True
+        Interval.Integer.intersects IntervalType.T.Open a IntervalType.T.Closed d |> should be False
+        Interval.Integer.intersects IntervalType.T.Open a IntervalType.T.Open d |> should be False
+        Interval.Integer.intersects IntervalType.T.Open a IntervalType.T.LeftClosedRightOpen d |> should be False
+        Interval.Integer.intersects IntervalType.T.Open a IntervalType.T.LeftOpenRightClosed d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen a IntervalType.T.Closed d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen a IntervalType.T.Open d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen a IntervalType.T.LeftClosedRightOpen d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen a IntervalType.T.LeftOpenRightClosed d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed a IntervalType.T.Closed d |> should be True
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed a IntervalType.T.Open d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed a IntervalType.T.LeftClosedRightOpen d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed a IntervalType.T.LeftOpenRightClosed d |> should be True
+        // c(100,0) d(200,99)
+        Interval.Integer.intersects IntervalType.T.Closed c IntervalType.T.Closed d |> should be True
+        Interval.Integer.intersects IntervalType.T.Closed c IntervalType.T.Open d |> should be False
+        Interval.Integer.intersects IntervalType.T.Closed c IntervalType.T.LeftClosedRightOpen d |> should be False
+        Interval.Integer.intersects IntervalType.T.Closed c IntervalType.T.LeftOpenRightClosed d |> should be True
+        Interval.Integer.intersects IntervalType.T.Open c IntervalType.T.Closed d |> should be False
+        Interval.Integer.intersects IntervalType.T.Open c IntervalType.T.Open d |> should be False
+        Interval.Integer.intersects IntervalType.T.Open c IntervalType.T.LeftClosedRightOpen d |> should be False
+        Interval.Integer.intersects IntervalType.T.Open c IntervalType.T.LeftOpenRightClosed d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen c IntervalType.T.Closed d |> should be True
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen c IntervalType.T.Open d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen c IntervalType.T.LeftClosedRightOpen d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftClosedRightOpen c IntervalType.T.LeftOpenRightClosed d |> should be True
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed c IntervalType.T.Closed d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed c IntervalType.T.Open d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed c IntervalType.T.LeftClosedRightOpen d |> should be False
+        Interval.Integer.intersects IntervalType.T.LeftOpenRightClosed c IntervalType.T.LeftOpenRightClosed d |> should be False
+
+[<TestFixture; Category("Unit")>]
+type ``Given a zero length integer interval`` () =
+
+    [<Test>]
+    member x.``I can derived the closed interval`` () =
+        let a = Interval.make(0,0)
+        Interval.Integer.toClosed IntervalType.T.Closed a |> should equal (Interval.make(0,0))
+        Interval.Integer.toClosed IntervalType.T.Open a |> should equal (Interval.make(0,0))
+        Interval.Integer.toClosed IntervalType.T.LeftClosedRightOpen a |> should equal (Interval.make(0,0))
+        Interval.Integer.toClosed IntervalType.T.LeftOpenRightClosed a |> should equal (Interval.make(0,0))
+        Interval.Integer.toClosed IntervalType.T.Closed (Interval.flip a) |> should equal (Interval.make(0,0))
+        Interval.Integer.toClosed IntervalType.T.Open (Interval.flip a) |> should equal (Interval.make(0,0))
+        Interval.Integer.toClosed IntervalType.T.LeftClosedRightOpen (Interval.flip a) |> should equal (Interval.make(0,0))
+        Interval.Integer.toClosed IntervalType.T.LeftOpenRightClosed (Interval.flip a) |> should equal (Interval.make(0,0))
+
+    [<Test>]
+    member x.``I can check if it overlaps with another interval`` () =
+        let a = Interval.make(0,0)
+        let b = Interval.make(-10,10)
+
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(-10,10)) |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(-10,0)) |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(0,10)) |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(0,0)) |> should equal 0
+        Interval.Integer.overlaps IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(1,10)) |> should equal -1
+
+    [<Test>]
+    member x.``I can check if it intersects with another interval`` () =
+        let a = Interval.make(0,0)
+        let b = Interval.make(-10,10)
+
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(-10,10)) |> should be True
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(-10,0)) |> should be False
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(0,10)) |> should be False
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(0,0)) |> should be False
+        Interval.Integer.intersects IntervalType.T.Closed a IntervalType.T.Closed (Interval.make(1,10)) |> should be False
+
+[<TestFixture; Category("Unit")>]
 type ``Given a value interval`` () =
 
     [<Test>]

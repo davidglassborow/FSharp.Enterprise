@@ -33,13 +33,13 @@ module Interval =
 
     type T<'n> = 'n * 'n
 
-    let left interval = 
+    let left (interval:T<_>) = 
         fst interval
 
-    let right interval = 
+    let right (interval:T<_>) = 
         snd interval
 
-    let make (left,right) = 
+    let make (left,right) : T<'n> = 
         left,right
 
     let flip interval = 
@@ -91,7 +91,32 @@ module Interval =
         |> generatorF
         |> Seq.pairwise
         |> Seq.map make
-   
+
+    module Integer =    
+
+        let toClosed intervalType (interval:T<int>) =
+            if left interval = right interval then
+                interval
+            else
+                make(
+                    if IntervalType.isLeftClosed intervalType 
+                    then left interval
+                    elif isOrdered (<=) interval 
+                    then left interval + 1
+                    else left interval - 1
+                    ,
+                    if IntervalType.isRightClosed intervalType 
+                    then right interval
+                    elif isOrdered (<=) interval 
+                    then right interval - 1
+                    else right interval + 1)
+
+        let intersects t1 i1 t2 i2 = 
+            intersects (toClosed t1 i1) (toClosed t2 i2)
+
+        let overlaps t1 i1 t2 i2 = 
+            overlaps (toClosed t1 i1) (toClosed t2 i2)
+           
     /// Represents an interval between two options of float.
     module Value =
 
