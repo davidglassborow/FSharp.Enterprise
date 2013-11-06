@@ -17,7 +17,7 @@ module Line =
     let make ctorF args = 
         Line(Seq.map ctorF args |> Seq.toArray)
 
-    let empty = 
+    let empty<'x,'y> : T<'x,'y> = 
         Line(Array.empty)
     
     let isEmpty (Line(segments)) = 
