@@ -210,6 +210,11 @@ module Line =
         Seq.pairwise segments
         |> Seq.forall (fun (s1,s2) -> pred (Segment.endX s1) (Segment.startX s2))
 
+    /// Returns true if the line is contiguous over the interval, otherwise false.
+    let isContiguousOverInterval segmentInterpolateF pred line interval =
+        let slice = slice segmentInterpolateF interval line
+        range slice ?= interval && isContiguous pred slice
+
 
     module Time =
     

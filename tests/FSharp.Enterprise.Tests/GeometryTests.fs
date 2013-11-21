@@ -743,6 +743,23 @@ type ``Given a continuous TimeLine`` () =
         let expected = false
         actual |> should equal expected
 
+    [<Test>]
+    member x.``I can determine if the line is contiguous over an interval`` () =
+        let line = 
+            [
+                IntervalType.T.LeftClosedRightOpen, 0.0, 30.0, 10.0
+                IntervalType.T.LeftClosedRightOpen, 30.0, 60.0, 20.0
+                IntervalType.T.LeftClosedRightOpen, 60.0, 90.0, 30.0
+                IntervalType.T.LeftClosedRightOpen, 120.0, 150.0, 50.0
+            ] 
+            |> List.map (fun (t,t1,t2,v) -> Segment.makeDiscrete (t, Interval.make(Helper.d0.AddMinutes(t1), Helper.d0.AddMinutes(t2)), v))
+            |> Line.ofSegments
+        Interval.make(Helper.d0.AddMinutes( -1.0),Helper.d0.AddMinutes( 90.0)) |> Line.isContiguousOverInterval (Some Segment.Time.interpolateValue) (=) line |> should be False
+        Interval.make(Helper.d0.AddMinutes(  0.0),Helper.d0.AddMinutes( 90.0)) |> Line.isContiguousOverInterval (Some Segment.Time.interpolateValue) (=) line |> should be True
+        Interval.make(Helper.d0.AddMinutes(  0.0),Helper.d0.AddMinutes( 91.0)) |> Line.isContiguousOverInterval (Some Segment.Time.interpolateValue) (=) line |> should be False
+        Interval.make(Helper.d0.AddMinutes(  0.0),Helper.d0.AddMinutes(125.0)) |> Line.isContiguousOverInterval (Some Segment.Time.interpolateValue) (=) line |> should be False
+        Interval.make(Helper.d0.AddMinutes(140.0),Helper.d0.AddMinutes(151.0)) |> Line.isContiguousOverInterval (Some Segment.Time.interpolateValue) (=) line |> should be False
+
 
 type ``Given an instantaneous TimeLine`` () =
 
@@ -1006,11 +1023,11 @@ type ``Given a Discrete TimeLine`` () =
 
     [<Test>]
     member x.``I can convert a line into a sequence of points`` () =
-        let points = [
+        let segments = [
                          Segment.makeDiscrete (IntervalType.T.LeftClosedRightOpen, Interval.make(Helper.d0, Helper.d0.AddMinutes(30.0)), 0.)
                          Segment.makeDiscrete (IntervalType.T.LeftClosedRightOpen, Interval.make(Helper.d0.AddMinutes(30.0), Helper.d0.AddMinutes(60.0)), 100.)
                      ]   
-        let line = Line.ofSegments points
+        let line = Line.ofSegments segments
         let actual = Line.toPoints line
         let expected = [Helper.d0, 0.0; Helper.d0.AddMinutes(30.0), 100.; Helper.d0.AddMinutes(60.0), 100.] |> List.map Point.make |> List.toSeq
         actual |> should equal expected 
@@ -1021,5 +1038,21 @@ type ``Given a Discrete TimeLine`` () =
         let actual = Line.toPoints line
         let expected = [] |> List.toSeq
         actual |> should equal expected 
-        
+
+    [<Test>]
+    member x.``I can determine if the line is contiguous over an interval`` () =
+        let line = 
+            [
+                IntervalType.T.LeftClosedRightOpen, 0.0, 30.0, "foo"
+                IntervalType.T.LeftClosedRightOpen, 30.0, 60.0, "bar"
+                IntervalType.T.LeftClosedRightOpen, 60.0, 90.0, "baz"
+                IntervalType.T.LeftClosedRightOpen, 120.0, 150.0, "qux"
+            ] 
+            |> List.map (fun (t,t1,t2,v) -> Segment.makeDiscrete (t, Interval.make(Helper.d0.AddMinutes(t1), Helper.d0.AddMinutes(t2)), v))
+            |> Line.ofSegments
+        Interval.make(Helper.d0.AddMinutes( -1.0),Helper.d0.AddMinutes( 90.0)) |> Line.isContiguousOverInterval None (=) line |> should be False
+        Interval.make(Helper.d0.AddMinutes(  0.0),Helper.d0.AddMinutes( 90.0)) |> Line.isContiguousOverInterval None (=) line |> should be True
+        Interval.make(Helper.d0.AddMinutes(  0.0),Helper.d0.AddMinutes( 91.0)) |> Line.isContiguousOverInterval None (=) line |> should be False
+        Interval.make(Helper.d0.AddMinutes(  0.0),Helper.d0.AddMinutes(125.0)) |> Line.isContiguousOverInterval None (=) line |> should be False
+        Interval.make(Helper.d0.AddMinutes(140.0),Helper.d0.AddMinutes(151.0)) |> Line.isContiguousOverInterval None (=) line |> should be False
         
