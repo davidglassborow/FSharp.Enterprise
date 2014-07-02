@@ -243,3 +243,8 @@ module Line =
             |> Option.getOrElseWith Seq.empty (fun interval ->
                 Interval.Time.toSeq intervalType timeSpan interval
                 |> Seq.map (fun time -> tryFindValue segmentInterpolateF time line))
+
+        let reducePoints epsilon line =
+            let points = toPoints line |> Seq.toArray
+            let points' = Point.Time.reducePoints epsilon points
+            points' |> Seq.pairwise |> make (Segment.Continuous)

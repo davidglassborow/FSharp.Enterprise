@@ -2,6 +2,8 @@
 
 module Math = 
 
+    open System
+
     module Interpolation =
 
         let inline linear value x y x' y' : ^T =
@@ -35,3 +37,22 @@ module Math =
                 None
         else
             None
+
+
+    module TolerantComparisonFunctions =
+
+        let inline isEqual epsilon a b = a = b || abs(a - b) < epsilon
+        let inline isNotEqual epsilon a b = a <> b && not (abs(a - b) < epsilon)
+
+        /// Equal to within a tolerance.
+        let inline eq epsilon a b = isEqual epsilon a b
+        /// Less than or equal to within a tolerance.
+        let inline le epsilon a b = isEqual epsilon a b || a < b
+        /// Greater than or equal to within a tolerance.
+        let inline ge epsilon a b = isEqual epsilon a b || a > b
+        /// Not equal to within a tolerance.
+        let inline ne epsilon a b = isNotEqual epsilon a b
+        /// Less than to within a tolerance.
+        let inline lt epsilon a b = isNotEqual epsilon a b && a < b
+        /// Greater than to within a tolerance.
+        let inline gt epsilon a b = isNotEqual epsilon a b && a > b

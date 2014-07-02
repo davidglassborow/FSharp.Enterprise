@@ -5,6 +5,7 @@ open FsUnit
 open System
 open FSharp.Enterprise.OptionOperators
 open FSharp.Enterprise
+open MathNet.Numerics.Distributions
 
 module Helper =
 
@@ -23,6 +24,97 @@ module Helper =
                 yield intervalType, Interval.make(t1, t1.AddMinutes(float timeStep)), values.[i] 
         |]
 
+    /// Generates points using geometric Brownian motion
+    ///  - 'seed' specifies the seed for random number generator
+    ///  - 'drift' and 'volatility' set properties of the value movement
+    ///  - 'initial' and 'start' specify the initial value and date
+    ///  - 'span' specifies time span between individual observations
+    ///  - 'count' is the number of required values to generate
+    let randomPoints seed drift volatility initial start span count =
+        let dist = Normal(0.0, 1.0, RandomSource=Random(seed))  
+        let dt = (span:TimeSpan).TotalDays / 250.0
+        let driftExp = (drift - 0.5 * pown volatility 2) * dt
+        let randExp = volatility * (sqrt dt)
+        ((start:DateTimeOffset), initial) |> Seq.unfold (fun (dt, price) ->
+            let price = price * exp (driftExp + randExp * dist.Sample()) 
+            Some((dt, price), (dt + span, price))) |> Seq.take count
+
+    let testLine lineGen span count =
+        lineGen span count
+        |> Seq.map Point.make
+        |> Seq.pairwise
+        |> Line.make (Segment.Continuous)
+
+    let today = DateTimeOffset(DateTime.Today)
+    let lineGen1 = randomPoints 1 5.0 100.0 20.0 today
+    let lineGen2 = randomPoints 2 5.0 100.0 20.0 today
+    let flatLineGen = randomPoints 3 0.0 0.0 20.0 today
+
+
+[<TestFixture; Category("Unit")>]
+type ``Given a Line Time reducePoints function`` () =
+
+    [<Test>]
+    member x.``I can reduce the points in a horizontal line by using a zero epsilon`` () =
+        let line = Helper.testLine Helper.flatLineGen (TimeSpan.FromMinutes 5.) 20
+        let line' = Line.Time.reducePoints 0.0 line
+        Line.segments line |> Array.length |> should equal 19
+        Line.segments line' |> Array.length |> should equal 1
+
+    [<Test>]
+    member x.``I can reduce the points in a vertical line by using a zero epsilon`` () =
+        let line = 
+            [|0.0,0.0; 0.0,10.0; 0.0,20.0|]
+            |> Seq.map (fun (x,y) -> Point.make(Helper.today.AddMinutes(x), y))
+            |> Seq.pairwise
+            |> Line.make (Segment.Continuous)
+        let line' = Line.Time.reducePoints 0.0 line
+        Line.segments line |> Array.length |> should equal 2
+        Line.segments line' |> Array.length |> should equal 1
+
+    [<Test>]
+    member x.``I can reduce the points in a rising line by using a zero epsilon`` () =
+        let line = 
+            [|-5.0,-5.0; 0.0,0.0; 5.0,5.0|]
+            |> Seq.map (fun (x,y) -> Point.make(Helper.today.AddMinutes(x), y))
+            |> Seq.pairwise
+            |> Line.make (Segment.Continuous)
+        let line' = Line.Time.reducePoints 0.0 line
+        Line.segments line |> Array.length |> should equal 2
+        Line.segments line' |> Array.length |> should equal 1
+
+    [<Test>]
+    member x.``I can reduce the points in a falling line by using a zero epsilon`` () =
+        let line = 
+            [|-5.0,5.0; 0.0,0.0; 5.0,-5.0|]
+            |> Seq.map (fun (x,y) -> Point.make(Helper.today.AddMinutes(x), y))
+            |> Seq.pairwise
+            |> Line.make (Segment.Continuous)
+        let line' = Line.Time.reducePoints 0.0 line
+        Line.segments line |> Array.length |> should equal 2
+        Line.segments line' |> Array.length |> should equal 1
+
+    [<Test>]
+    member x.``I can reduce the points in a line by using a zero epsilon (part 1)`` () =
+        let line = 
+            [|-6.0,-6.0; -3.0,-6.0; 0.0,-6.0; 0.0,0.0; 0.0,6.0; 3.0,6.0; 6.0,6.0|]
+            |> Seq.map (fun (x,y) -> Point.make(Helper.today.AddMinutes(x), y))
+            |> Seq.pairwise
+            |> Line.make (Segment.Continuous)
+        let line' = Line.Time.reducePoints 0.0 line
+        Line.segments line |> Array.length |> should equal 6
+        Line.segments line' |> Array.length |> should equal 3
+
+    [<Test>]
+    member x.``I can reduce the points in a line by using a zero epsilon (part 2)`` () =
+        let line = 
+            [|-6.0,6.0; -3.0,6.0; 0.0,6.0; 0.0,0.0; 0.0,-6.0; 3.0,-6.0; 6.0,-6.0|]
+            |> Seq.map (fun (x,y) -> Point.make(Helper.today.AddMinutes(x), y))
+            |> Seq.pairwise
+            |> Line.make (Segment.Continuous)
+        let line' = Line.Time.reducePoints 0.0 line
+        Line.segments line |> Array.length |> should equal 6
+        Line.segments line' |> Array.length |> should equal 3
 
               
 [<TestFixture; Category("Unit")>]
