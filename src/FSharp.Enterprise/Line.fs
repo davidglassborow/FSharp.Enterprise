@@ -130,6 +130,11 @@ module Line =
     let tryFindSegment x (Line(segments)) =        
         Array.tryFind (fun s -> Segment.isInRange (Segment.intervalType s) x s) segments
 
+    /// Finds the corresponding y value for the given x value. Throws a
+    /// KeyNotFoundException if none is found.
+    let findValue segmentInterpolateF x (Line(segments)) =
+        Array.pick (fun s -> Segment.tryFindValue segmentInterpolateF (Segment.intervalType s) x s) segments
+
     let tryFindValue segmentInterpolateF x (Line(segments)) =            
         Array.tryPick (fun s -> Segment.tryFindValue segmentInterpolateF (Segment.intervalType s) x s) segments
 
