@@ -1,9 +1,20 @@
-﻿#r "tools/Fake/tools/FakeLib.dll"
-//#I @"tools\FSharp.Formatting"
+﻿// --------------------------------------------------------------------------------------
+// FAKE build script 
+// --------------------------------------------------------------------------------------
 
-
+#r @"packages/FAKE/tools/NuGet.Core.dll"
+#r @"packages/FAKE/tools/FakeLib.dll"
 open Fake
+open Fake.Git
+open Fake.AssemblyInfoFile
+open Fake.ReleaseNotesHelper
+open System
 open System.IO
+#if MONO
+#else
+#load "packages/SourceLink.Fake/Tools/Fake.fsx"
+open SourceLink
+#endif
 
 let nugetPath = Path.Combine(__SOURCE_DIRECTORY__,@"tools\NuGet\NuGet.exe")
 
@@ -24,32 +35,27 @@ Target "Clean" (fun _ ->
 )
 
 Target "AssemblyInfo" (fun _ -> 
-
-        AssemblyInfo (fun p -> 
-            { p with 
-                CodeLanguage = FSharp
-                AssemblyVersion = version
-                AssemblyTitle = projectName
-                Guid = "207C7E5B-DFFF-41DC-849A-53D10A0FF644"
-                OutputFileName = "src/FSharp.Enterprise/AssemblyInfo.fs"                
-            })
-        AssemblyInfo (fun p -> 
-            { p with 
-                CodeLanguage = FSharp
-                AssemblyVersion = version
-                AssemblyTitle = projectName + ".RabbitMq"
-                Guid = "D93F9436-D1DD-4FB1-9C0A-52298F9F0215"
-                OutputFileName = "src/FSharp.Enterprise.RabbitMq/AssemblyInfo.fs"                
-            })
-        AssemblyInfo (fun p -> 
-                  { p with 
-                      CodeLanguage = FSharp
-                      AssemblyVersion = version
-                      AssemblyTitle = projectName + ".Web"
-                      Guid = "C4855501-6D39-44CF-B55E-DE8EE16516AC"
-                      OutputFileName = "src/FSharp.Enterprise.Web/AssemblyInfo.fs"                
-                  })
-
+       
+        CreateFSharpAssemblyInfo "src/FSharp.Enterprise/AssemblyInfo.fs" 
+            [
+                Attribute.Version version
+                Attribute.Title projectName
+                Attribute.Guid "207C7E5B-DFFF-41DC-849A-53D10A0FF644"
+            ]
+       
+        CreateFSharpAssemblyInfo "src/FSharp.Enterprise.RabbitMq/AssemblyInfo.fs" 
+            [
+                Attribute.Version version
+                Attribute.Title (projectName + ".RabbitMq")
+                Attribute.Guid "D93F9436-D1DD-4FB1-9C0A-52298F9F0215"
+            ]
+       
+        CreateFSharpAssemblyInfo "src/FSharp.Enterprise.Web/AssemblyInfo.fs" 
+            [
+                Attribute.Version version
+                Attribute.Title (projectName + ".Web")
+                Attribute.Guid "C4855501-6D39-44CF-B55E-DE8EE16516AC"
+            ]
 )
 
 Target "BuildApp" (fun _ ->
@@ -62,8 +68,7 @@ Target "BuildTest" (fun _ ->
 )
 
 Target "Test" (fun _ ->
-    !+ (testDir + "/*.Tests.dll")
-        |> Scan
+    !! (testDir + "/*.Tests.dll")
         |> NUnit (fun p ->
             {p with
                 DisableShadowCopy = true
@@ -71,9 +76,10 @@ Target "Test" (fun _ ->
 )
 
 Target "Deploy" (fun _ ->
-    !+ (buildDir + "/**/FSharp.Enterprise*.dll")
+    !! (buildDir + "/**/FSharp.Enterprise*.dll")
+        ++ (buildDir + "/**/FSharp.Enterprise.pdb")
+        ++ (buildDir + "/**/FSharp.Enterprise.xml")
         -- "*.zip"
-        |> Scan
         |> Zip buildDir (deployDir + sprintf "\%s-%s.zip" projectName version)
 )
 
@@ -83,8 +89,8 @@ Target "BuildNuGet" (fun _ ->
     printfn "%s" nugetPath
     [
         "lib", buildDir + "\FSharp.Enterprise.dll"
-      //  "lib", buildDir + "\FSharp.Enterprise.RabbitMq.dll"
-      //  "lib", buildDir + "\FSharp.Enterprise.Web.dll"
+        "lib", buildDir + "\FSharp.Enterprise.pdb"
+        "lib", buildDir + "\FSharp.Enterprise.xml"
     ] |> Seq.iter (fun (folder, path) -> 
                     let dir = nugetDir @@ folder @@ "net40"
                     CreateDir dir
@@ -107,18 +113,15 @@ Target "BuildNuGet" (fun _ ->
     ] |> CopyTo deployDir
 )
 
-Target "Default" DoNothing
+// --------------------------------------------------------------------------------------
+// Run all targets by default. Invoke 'build <Target>' to override
 
-"RestorePackages"
-    ==> "Clean"
+"Clean"
+    ==> "RestorePackages"
+    ==> "AssemblyInfo"
     ==> "BuildApp" <=> "BuildTest"
     ==> "Test" 
     ==> "BuildNuGet"
     ==> "Deploy"
-    ==> "Default"
-  
-if not isLocalBuild then
-    "Clean" ==> "AssemblyInfo" ==> "BuildApp" |> ignore
 
-// start build
-RunParameterTargetOrDefault "target" "Default"
+RunTargetOrDefault "Deploy"
