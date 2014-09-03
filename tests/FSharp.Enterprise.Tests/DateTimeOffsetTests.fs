@@ -20,6 +20,31 @@ type ``Given a DateTimeOffset`` () =
       let c = e.Subtract(s).TotalMinutes / granularity.TotalMinutes |> int
       s, new ResizeArray<_>(Seq.init c (fun i -> Nullable<_>(i |> float32)))
 
+
+    [<Test>]
+    member x.``I can ceil to a month`` () =
+        let actual = date |> DateTimeOffset.ceilMonth
+        let expected = DateTimeOffset(2013,6,1,0,0,0,TimeSpan.FromHours(0.0))
+        actual |> should equal expected
+
+    [<Test>]
+    member x.``I can floor to a month`` () =
+        let actual = date |> DateTimeOffset.floorMonth
+        let expected = DateTimeOffset(2013,5,1,0,0,0,TimeSpan.FromHours(0.0))
+        actual |> should equal expected
+
+    [<Test>]
+    member x.``I can round down to the nearest month`` () =
+        let actual = date |> DateTimeOffset.roundMonth
+        let expected = DateTimeOffset(2013,5,1,0,0,0,TimeSpan.FromHours(0.0))
+        actual |> should equal expected
+
+    [<Test>]
+    member x.``I can round up to the nearest month`` () =
+        let actual = date.AddDays(8.0) |> DateTimeOffset.roundMonth
+        let expected = DateTimeOffset(2013,6,1,0,0,0,TimeSpan.FromHours(0.0))
+        actual |> should equal expected
+
     [<Test>]
     member x.``I can round down to the nearest minute`` () =
         let actual = date.AddSeconds(14.) |> DateTimeOffset.roundMinute

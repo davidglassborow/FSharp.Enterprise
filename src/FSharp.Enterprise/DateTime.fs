@@ -10,6 +10,7 @@ module DateTime =
         | Minute
         | Halfhour
         | Day
+        | Month
 
     type ClockChangeType =
           | NoClockChange
@@ -169,6 +170,12 @@ module DateTime =
                     d
                 else
                     d.AddDays(1.0) 
+            | Month ->
+                let d = DateTime(x.Year, x.Month, 1, 0, 0, 0)
+                let delta = x - d
+                if delta = zero 
+                then d
+                else d.AddMonths(1)
 
         [<Extension>]
         member x.Floor(timeBoundary:TimeBoundary) =
@@ -184,6 +191,8 @@ module DateTime =
                     d.AddMinutes(30.0)
             | Day ->
                 DateTime(x.Year, x.Month, x.Day, 0, 0, 0)
+            | Month ->
+                DateTime(x.Year, x.Month, 1, 0, 0, 0)
 
         [<Extension>]
         member x.Round(timeBoundary:TimeBoundary) =
@@ -204,6 +213,15 @@ module DateTime =
                 if delta <= TimeSpan.FromHours(12.0)
                 then d
                 else d.AddDays(1.0) 
+            | Month ->
+                let thisMonth = DateTime(x.Year, x.Month, 1, 0, 0, 0)
+                let nextMonth = thisMonth.AddMonths(1)
+                let split = TimeSpan((nextMonth - thisMonth).Ticks / 2L)
+                let delta = x - thisMonth
+                if delta <= split
+                then thisMonth
+                else nextMonth
+                
                 
     let roundMinute (d:DateTime) = d.Round(TimeBoundary.Minute)
     let ceilMinute (d:DateTime) = d.Ceil(TimeBoundary.Minute)
@@ -212,6 +230,14 @@ module DateTime =
     let roundHalfhour (d:DateTime) = d.Round(TimeBoundary.Halfhour)
     let ceilHalfhour (d:DateTime) = d.Ceil(TimeBoundary.Halfhour)
     let floorHalfhour (d:DateTime) = d.Floor(TimeBoundary.Halfhour)
+
+    let roundDay (d:DateTime) = d.Round(TimeBoundary.Day)
+    let ceilDay (d:DateTime) = d.Ceil(TimeBoundary.Day)
+    let floorDay (d:DateTime) = d.Floor(TimeBoundary.Day)
+
+    let roundMonth (d:DateTime) = d.Round(TimeBoundary.Month)
+    let ceilMonth (d:DateTime) = d.Ceil(TimeBoundary.Month)
+    let floorMonth (d:DateTime) = d.Floor(TimeBoundary.Month)
 
 
 module DateTimeOffset = 
@@ -348,6 +374,12 @@ module DateTimeOffset =
                     d
                 else
                     d.AddDays(1.0) 
+            | Month ->
+                let d = DateTimeOffset(x.Year, x.Month, 1, 0, 0, 0, x.Offset)
+                let delta = x - d
+                if delta = zero 
+                then d
+                else d.AddMonths(1)
     
         [<Extension>]
         member x.Floor(timeBoundary:TimeBoundary) =
@@ -363,6 +395,8 @@ module DateTimeOffset =
                     d.AddMinutes(30.0)
             | Day ->
                 DateTimeOffset(x.Year, x.Month, x.Day, 0, 0, 0, x.Offset)
+            | Month ->
+                DateTimeOffset(x.Year, x.Month, 1, 0, 0, 0, x.Offset)
     
         [<Extension>]
         member x.Round(timeBoundary:TimeBoundary) =
@@ -383,6 +417,14 @@ module DateTimeOffset =
                 if delta <= TimeSpan.FromHours(12.0)
                 then d
                 else d.AddDays(1.0) 
+            | Month ->
+                let thisMonth = DateTimeOffset(x.Year, x.Month, 1, 0, 0, 0, x.Offset)
+                let nextMonth = thisMonth.AddMonths(1)
+                let split = TimeSpan((nextMonth - thisMonth).Ticks / 2L)
+                let delta = x - thisMonth
+                if delta <= split
+                then thisMonth
+                else nextMonth
     
     let roundMinute (d:DateTimeOffset) = d.Round(TimeBoundary.Minute)
     let ceilMinute (d:DateTimeOffset) = d.Ceil(TimeBoundary.Minute)
@@ -395,6 +437,10 @@ module DateTimeOffset =
     let roundDay (d:DateTimeOffset) = d.Round(TimeBoundary.Day)
     let ceilDay (d:DateTimeOffset) = d.Ceil(TimeBoundary.Day)
     let floorDay (d:DateTimeOffset) = d.Floor(TimeBoundary.Day)
+
+    let roundMonth (d:DateTimeOffset) = d.Round(TimeBoundary.Month)
+    let ceilMonth (d:DateTimeOffset) = d.Ceil(TimeBoundary.Month)
+    let floorMonth (d:DateTimeOffset) = d.Floor(TimeBoundary.Month)
 
     /// Returns the halfhours surrounding the given time. 
     /// When the give time is on the halfhour then if defaultToLowerBound
