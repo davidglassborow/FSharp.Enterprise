@@ -491,3 +491,115 @@ type ``Given a DateTimeOffset`` () =
         let lower,upper = DateTimeOffset.boundingHalfhours false d
         lower |> should equal (d.AddMinutes(-30.0))
         upper |> should equal d
+
+    [<Test>]
+    member test.``I can find the previous, next and bounding minute on a boundary``() = 
+        let d = DateTimeOffset(2012, 03, 01, 0, 0, 0, TimeSpan.Zero)
+        let previous = DateTimeOffset.previousMinute d
+        let next = DateTimeOffset.nextMinute d
+        let lower1,upper1 = DateTimeOffset.boundingMinute true d
+        let lower2,upper2 = DateTimeOffset.boundingMinute false d
+        previous |> should equal (d.AddMinutes(-1.0))
+        next |> should equal (d.AddMinutes(1.0))
+        lower1 |> should equal d
+        upper1 |> should equal next
+        lower2 |> should equal previous
+        upper2 |> should equal d
+
+    [<Test>]
+    member test.``I can find the previous, next and bounding halfhour on a boundary``() = 
+        let d = DateTimeOffset(2012, 03, 01, 0, 0, 0, TimeSpan.Zero)
+        let previous = DateTimeOffset.previousHalfhour d
+        let next = DateTimeOffset.nextHalfhour d
+        let lower1,upper1 = DateTimeOffset.boundingHalfhour true d
+        let lower2,upper2 = DateTimeOffset.boundingHalfhour false d
+        previous |> should equal (d.AddMinutes(-30.0))
+        next |> should equal (d.AddMinutes(30.0))
+        lower1 |> should equal d
+        upper1 |> should equal next
+        lower2 |> should equal previous
+        upper2 |> should equal d
+
+    [<Test>]
+    member test.``I can find the previous, next and bounding day on a boundary``() = 
+        let d = DateTimeOffset(2012, 03, 01, 0, 0, 0, TimeSpan.Zero)
+        let previous = DateTimeOffset.previousDay d
+        let next = DateTimeOffset.nextDay d
+        let lower1,upper1 = DateTimeOffset.boundingDay true d
+        let lower2,upper2 = DateTimeOffset.boundingDay false d
+        previous |> should equal (d.AddDays(-1.0))
+        next |> should equal (d.AddDays(1.0))
+        lower1 |> should equal d
+        upper1 |> should equal next
+        lower2 |> should equal previous
+        upper2 |> should equal d
+
+    [<Test>]
+    member test.``I can find the previous, next and bounding month on a boundary``() = 
+        let d = DateTimeOffset(2012, 03, 01, 0, 0, 0, TimeSpan.Zero)
+        let previous = DateTimeOffset.previousMonth d
+        let next = DateTimeOffset.nextMonth d
+        let lower1,upper1 = DateTimeOffset.boundingMonth true d
+        let lower2,upper2 = DateTimeOffset.boundingMonth false d
+        previous |> should equal (d.AddMonths(-1))
+        next |> should equal (d.AddMonths(1))
+        lower1 |> should equal d
+        upper1 |> should equal next
+        lower2 |> should equal previous
+        upper2 |> should equal d
+
+    [<Test>]
+    member test.``I can find the previous, next and bounding minute``() = 
+        let d = DateTimeOffset(2012, 03, 01, 13, 15, 15, TimeSpan.Zero)
+        let previous = DateTimeOffset.previousMinute d
+        let next = DateTimeOffset.nextMinute d
+        let lower1,upper1 = DateTimeOffset.boundingMinute true d
+        let lower2,upper2 = DateTimeOffset.boundingMinute false d
+        previous |> should equal (DateTimeOffset(2012, 03, 01, 13, 15, 0, TimeSpan.Zero))
+        next |> should equal (DateTimeOffset(2012, 03, 01, 13, 16, 0, TimeSpan.Zero))
+        lower1 |> should equal previous
+        upper1 |> should equal next
+        lower2 |> should equal previous
+        upper2 |> should equal next
+
+    [<Test>]
+    member test.``I can find the previous, next and bounding halfhour``() = 
+        let d = DateTimeOffset(2012, 03, 01, 13, 15, 15, TimeSpan.Zero)
+        let previous = DateTimeOffset.previousHalfhour d
+        let next = DateTimeOffset.nextHalfhour d
+        let lower1,upper1 = DateTimeOffset.boundingHalfhour true d
+        let lower2,upper2 = DateTimeOffset.boundingHalfhour false d
+        previous |> should equal (DateTimeOffset(2012, 03, 01, 13, 0, 0, TimeSpan.Zero))
+        next |> should equal (DateTimeOffset(2012, 03, 01, 13, 30, 0, TimeSpan.Zero))
+        lower1 |> should equal previous
+        upper1 |> should equal next
+        lower2 |> should equal previous
+        upper2 |> should equal next
+
+    [<Test>]
+    member test.``I can find the previous, next and bounding day``() = 
+        let d = DateTimeOffset(2012, 03, 01, 13, 15, 15, TimeSpan.Zero)
+        let previous = DateTimeOffset.previousDay d
+        let next = DateTimeOffset.nextDay d
+        let lower1,upper1 = DateTimeOffset.boundingDay true d
+        let lower2,upper2 = DateTimeOffset.boundingDay false d
+        previous |> should equal (DateTimeOffset(2012, 03, 01, 0, 0, 0, TimeSpan.Zero))
+        next |> should equal (DateTimeOffset(2012, 03, 02, 0, 0, 0, TimeSpan.Zero))
+        lower1 |> should equal previous
+        upper1 |> should equal next
+        lower2 |> should equal previous
+        upper2 |> should equal next
+
+    [<Test>]
+    member test.``I can find the previous, next and bounding month``() = 
+        let d = DateTimeOffset(2012, 03, 01, 13, 15, 15, TimeSpan.Zero)
+        let previous = DateTimeOffset.previousMonth d
+        let next = DateTimeOffset.nextMonth d
+        let lower1,upper1 = DateTimeOffset.boundingMonth true d
+        let lower2,upper2 = DateTimeOffset.boundingMonth false d
+        previous |> should equal (DateTimeOffset(2012, 03, 01, 0, 0, 0, TimeSpan.Zero))
+        next |> should equal (DateTimeOffset(2012, 04, 01, 0, 0, 0, TimeSpan.Zero))
+        lower1 |> should equal previous
+        upper1 |> should equal next
+        lower2 |> should equal previous
+        upper2 |> should equal next

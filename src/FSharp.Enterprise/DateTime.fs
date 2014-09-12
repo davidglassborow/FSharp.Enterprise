@@ -425,22 +425,61 @@ module DateTimeOffset =
                 if delta <= split
                 then thisMonth
                 else nextMonth
+
+        [<Extension>]
+        member x.Next(timeBoundary: TimeBoundary) =
+            match timeBoundary with
+            | Minute -> x.Floor(timeBoundary).AddMinutes(1.0)
+            | Halfhour -> x.Floor(timeBoundary).AddMinutes(30.0)
+            | Day -> x.Floor(timeBoundary).AddDays(1.0)
+            | Month -> x.Floor(timeBoundary).AddMonths(1)
+
+        [<Extension>]
+        member x.Previous(timeBoundary: TimeBoundary) =
+            match timeBoundary with
+            | Minute -> x.Ceil(timeBoundary).AddMinutes(-1.0)
+            | Halfhour -> x.Ceil(timeBoundary).AddMinutes(-30.0)
+            | Day -> x.Ceil(timeBoundary).AddDays(-1.0)
+            | Month -> x.Ceil(timeBoundary).AddMonths(-1)
+
+        [<Extension>]
+        member x.Bounding(defaultToLowerBound: bool, timeBoundary: TimeBoundary) =
+            let startTime = x.Floor(timeBoundary)
+            let endTime = x.Ceil(timeBoundary)
+            if startTime = endTime then
+                if defaultToLowerBound 
+                then startTime,startTime.Next(timeBoundary)
+                else endTime.Previous(timeBoundary),endTime
+            else
+                startTime,endTime
     
     let roundMinute (d:DateTimeOffset) = d.Round(TimeBoundary.Minute)
     let ceilMinute (d:DateTimeOffset) = d.Ceil(TimeBoundary.Minute)
     let floorMinute (d:DateTimeOffset) = d.Floor(TimeBoundary.Minute)
-    
+    let boundingMinute defaultToLowerBound (d:DateTimeOffset) = d.Bounding(defaultToLowerBound, TimeBoundary.Minute)
+    let nextMinute (d:DateTimeOffset) = d.Next(TimeBoundary.Minute)
+    let previousMinute (d:DateTimeOffset) = d.Previous(TimeBoundary.Minute)
+
     let roundHalfhour (d:DateTimeOffset) = d.Round(TimeBoundary.Halfhour)
     let ceilHalfhour (d:DateTimeOffset) = d.Ceil(TimeBoundary.Halfhour)
     let floorHalfhour (d:DateTimeOffset) = d.Floor(TimeBoundary.Halfhour)
+    let boundingHalfhour defaultToLowerBound (d:DateTimeOffset) = d.Bounding(defaultToLowerBound, TimeBoundary.Halfhour)
+    let nextHalfhour (d:DateTimeOffset) = d.Next(TimeBoundary.Halfhour)
+    let previousHalfhour (d:DateTimeOffset) = d.Previous(TimeBoundary.Halfhour)
 
     let roundDay (d:DateTimeOffset) = d.Round(TimeBoundary.Day)
     let ceilDay (d:DateTimeOffset) = d.Ceil(TimeBoundary.Day)
     let floorDay (d:DateTimeOffset) = d.Floor(TimeBoundary.Day)
+    let boundingDay defaultToLowerBound (d:DateTimeOffset) = d.Bounding(defaultToLowerBound, TimeBoundary.Day)
+    let nextDay (d:DateTimeOffset) = d.Next(TimeBoundary.Day)
+    let previousDay (d:DateTimeOffset) = d.Previous(TimeBoundary.Day)
 
     let roundMonth (d:DateTimeOffset) = d.Round(TimeBoundary.Month)
     let ceilMonth (d:DateTimeOffset) = d.Ceil(TimeBoundary.Month)
     let floorMonth (d:DateTimeOffset) = d.Floor(TimeBoundary.Month)
+    let boundingMonth defaultToLowerBound (d:DateTimeOffset) = d.Bounding(defaultToLowerBound, TimeBoundary.Month)
+    let nextMonth (d:DateTimeOffset) = d.Next(TimeBoundary.Month)
+    let previousMonth (d:DateTimeOffset) = d.Previous(TimeBoundary.Month)
 
     /// Returns the halfhours surrounding the given time. 
     /// When the give time is on the halfhour then if defaultToLowerBound
@@ -477,4 +516,3 @@ module DateTimeOffset =
                         then series.InsertRange(shortDayIndex, Seq.init (TimeSpan.FromHours(1.).TotalMinutes / granularity.TotalMinutes |> int) (fun _ -> new 'a())) 
                     ) sindx
         series :> seq<_>
-
